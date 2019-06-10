@@ -110,7 +110,7 @@ void cpu_init(struct cpu *cpu)
   cpu->ram = malloc(128 * sizeof(unsigned char));
 }
 
-unsigned int cpu_ram_read(struct cpu *cpu, unsigned int index) {
+int cpu_ram_read(struct cpu *cpu, unsigned int index) {
   return cpu->registers[index];
 }
 
