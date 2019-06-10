@@ -45,12 +45,18 @@ void alu(struct cpu *cpu, enum alu_op op, unsigned char regA, unsigned char regB
 }
 
 /**
- * Run the CPU
+ * Run the CPU 
  */
 void cpu_run(struct cpu *cpu)
 {
   int running = 1; // True until we get a HLT instruction
   unsigned char ir;
+  unsigned int v, reg;
+
+  for (int i = 0; i < 6; i++)
+  {
+    // printf("Command: %d, ");
+  }
 
   while (running)
   {
@@ -58,11 +64,24 @@ void cpu_run(struct cpu *cpu)
     switch (ir)
     {
     case HLT:
+      printf("Exiting!\n");
       running = 0;
       exit(1);
       break;
+
     case PRN:
-      printf("%u\n", cpu->registers[cpu->pc++]);
+      printf("Printing!\n");
+      reg = cpu->ram[cpu->pc++];
+      v = cpu_ram_read(cpu, reg);
+      printf("%u\n", v);
+      cpu->pc++;
+      break;
+
+    case LDI:
+      printf("Saving!\n");
+      v = cpu->ram[cpu->pc++];
+      reg = cpu->ram[cpu->pc++];
+      cpu->registers[reg] = v;
       cpu->pc++;
       break;
 
@@ -86,5 +105,16 @@ void cpu_run(struct cpu *cpu)
  */
 void cpu_init(struct cpu *cpu)
 {
-  // TODO: Initialize the PC and other special registers
+  cpu->pc = 0;
+  cpu->registers = malloc(8 * sizeof(unsigned char));
+  cpu->ram = malloc(128 * sizeof(unsigned char));
 }
+
+unsigned int cpu_ram_read(struct cpu *cpu, unsigned int index) {
+  return cpu->registers[index];
+}
+
+void cpu_ram_write(struct cpu *cpu, unsigned int value, unsigned int index) {
+  cpu->registers[index] = value;
+}
+
