@@ -50,7 +50,7 @@ void alu(struct cpu *cpu, enum alu_op op, unsigned char regA, unsigned char regB
 void cpu_run(struct cpu *cpu)
 {
   int running = 1; // True until we get a HLT instruction
-   unsigned char ir;
+  unsigned char ir;
 
   while (running)
   {
@@ -61,10 +61,15 @@ void cpu_run(struct cpu *cpu)
       running = 0;
       exit(1);
       break;
+    case PRN:
+      printf("%u\n", cpu->registers[cpu->pc++]);
+      cpu->pc++;
+      break;
 
     default:
       printf("Unknown instruction %02x at address %02x\n", ir, cpu->pc);
-      exit(1);
+      cpu->pc++;
+      // exit(1);
     }
     // TODO
     // 1. Get the value of the current instruction (in address PC).
