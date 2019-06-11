@@ -39,17 +39,29 @@ void cpu_load(struct cpu *cpu, char *file_name)
  */
 void alu(struct cpu *cpu, enum alu_op op, unsigned char regA, unsigned char regB)
 {
+  int operandA = cpu_ram_read(cpu, regA);
+  int operandB = cpu_ram_read(cpu, regB);
+  float result;
+
   switch (op)
   {
-  case ALU_MUL:;
-    int operandA = cpu_ram_read(cpu, regA);
-    int operandB = cpu_ram_read(cpu, regB);
-    float result = (operandA * operandB);
-    printf("Product: %f\n", result);
+  case ALU_MUL:
+    result = (operandA * operandB);
     break;
 
-    // TODO: implement more ALU ops
+  case ALU_DIV:
+    result = (operandA / operandB);
+    break;
+
+  case ALU_ADD:
+    result = (operandA + operandB);
+    break;
+
+  case ALU_SUB:
+    result = (operandA - operandB);
+    break;
   }
+  printf("Result: %f\n", result);
 }
 
 /**
@@ -90,6 +102,24 @@ void cpu_run(struct cpu *cpu)
       regA = cpu->ram[cpu->pc + 1];
       regB = cpu->ram[cpu->pc + 2];
       alu(cpu, ALU_MUL, regA, regB);
+      break;
+
+    case DIV:
+      regA = cpu->ram[cpu->pc + 1];
+      regB = cpu->ram[cpu->pc + 2];
+      alu(cpu, ALU_DIV, regA, regB);
+      break;
+
+    case ADD:
+      regA = cpu->ram[cpu->pc + 1];
+      regB = cpu->ram[cpu->pc + 2];
+      alu(cpu, ALU_ADD, regA, regB);
+      break;
+
+    case SUB:
+      regA = cpu->ram[cpu->pc + 1];
+      regB = cpu->ram[cpu->pc + 2];
+      alu(cpu, ALU_SUB, regA, regB);
       break;
 
     default:
