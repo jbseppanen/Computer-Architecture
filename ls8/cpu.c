@@ -7,7 +7,7 @@
 /**
  * Load the binary bytes from a .ls8 source file into a RAM array
  */
-void cpu_load(struct cpu *cpu)
+void cpu_load(struct cpu *cpu, char *file_name)
 {
   char data[DATA_LEN] = {
       // From print8.ls8
@@ -25,8 +25,31 @@ void cpu_load(struct cpu *cpu)
   {
     cpu->ram[address++] = data[i];
   }
-
+  return;
   // TODO: Replace this with something less hard-coded
+  FILE *fp;
+  char line[1024];
+  printf("File Name:%s\n", file_name);
+  fp = fopen(file_name, 'r');
+  printf("Here!\n");
+
+  if (fp == NULL)
+  {
+    fprintf(stderr, "file not found\n");
+    exit(1);
+  }
+
+  while (fgets(line, 1024, fp) != NULL)
+  {
+    char *endptr;
+    unsigned char v = strtoul(line, &endptr, 2);
+    if (!(endptr == line)) //Check for empty/bad lines
+    {
+      cpu->ram[address] = data[address];
+      address++;
+    }
+  }
+  fclose(fp);
 }
 
 /**
@@ -71,18 +94,19 @@ void cpu_run(struct cpu *cpu)
 
     case PRN:
       printf("Printing!\n");
-      reg = cpu->ram[cpu->pc++];
+      reg = cpu->ram[cpu->pc + 1];
       v = cpu_ram_read(cpu, reg);
-      printf("%u\n", v);
-      cpu->pc++;
+      printf("%d\n", v);
+      cpu->pc += 2;
       break;
 
     case LDI:
-      printf("Saving!\n");
-      v = cpu->ram[cpu->pc++];
-      reg = cpu->ram[cpu->pc++];
-      cpu->registers[reg] = v;
-      cpu->pc++;
+      reg = cpu->ram[cpu->pc + 1];
+      v = cpu->ram[cpu->pc + 2];
+      printf("Saving %u\n", v);
+      cpu_ram_write(cpu, reg, v);
+      unsigned int temp = cpu_ram_read(cpu, reg);
+      cpu->pc += 3;
       break;
 
     default:
@@ -110,11 +134,12 @@ void cpu_init(struct cpu *cpu)
   cpu->ram = malloc(128 * sizeof(unsigned char));
 }
 
-int cpu_ram_read(struct cpu *cpu, unsigned int index) {
+int cpu_ram_read(struct cpu *cpu, unsigned int index)
+{
   return cpu->registers[index];
 }
 
-void cpu_ram_write(struct cpu *cpu, unsigned int value, unsigned int index) {
+void cpu_ram_write(struct cpu *cpu, unsigned int index, unsigned int value)
+{
   cpu->registers[index] = value;
 }
-
