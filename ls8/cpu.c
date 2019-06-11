@@ -41,8 +41,11 @@ void alu(struct cpu *cpu, enum alu_op op, unsigned char regA, unsigned char regB
 {
   switch (op)
   {
-  case ALU_MUL:
-    // TODO
+  case ALU_MUL:;
+    int operandA = cpu_ram_read(cpu, regA);
+    int operandB = cpu_ram_read(cpu, regB);
+    float result = (operandA * operandB);
+    printf("Product: %f\n", result);
     break;
 
     // TODO: implement more ALU ops
@@ -56,12 +59,7 @@ void cpu_run(struct cpu *cpu)
 {
   int running = 1; // True until we get a HLT instruction
   unsigned char ir;
-  unsigned int v, reg;
-
-  for (int i = 0; i < 6; i++)
-  {
-    // printf("Command: %d, ");
-  }
+  unsigned int v, regA, regB;
 
   while (running)
   {
@@ -76,33 +74,30 @@ void cpu_run(struct cpu *cpu)
 
     case PRN:
       printf("Printing!\n");
-      reg = cpu->ram[cpu->pc + 1];
-      v = cpu_ram_read(cpu, reg);
+      regA = cpu->ram[cpu->pc + 1];
+      v = cpu_ram_read(cpu, regA);
       printf("%d\n", v);
-      cpu->pc += 2;
       break;
 
     case LDI:
-      reg = cpu->ram[cpu->pc + 1];
+      regA = cpu->ram[cpu->pc + 1];
       v = cpu->ram[cpu->pc + 2];
       printf("Saving %u\n", v);
-      cpu_ram_write(cpu, reg, v);
-      unsigned int temp = cpu_ram_read(cpu, reg);
-      cpu->pc += 3;
+      cpu_ram_write(cpu, regA, v);
+      break;
+
+    case MUL:
+      regA = cpu->ram[cpu->pc + 1];
+      regB = cpu->ram[cpu->pc + 2];
+      alu(cpu, ALU_MUL, regA, regB);
       break;
 
     default:
       printf("Unknown instruction %02x at address %02x\n", ir, cpu->pc);
-      cpu->pc++;
-      // exit(1);
+      exit(1);
     }
-    // TODO
-    // 1. Get the value of the current instruction (in address PC).
-    // 2. Figure out how many operands this next instruction requires
-    // 3. Get the appropriate value(s) of the operands following this instruction
-    // 4. switch() over it to decide on a course of action.
-    // 5. Do whatever the instruction should do according to the spec.
-    // 6. Move the PC to the next instruction.
+    int number_of_operands = ((ir >> 6) & 0b11) + 1;
+    cpu->pc += number_of_operands;
   }
 }
 
@@ -116,12 +111,12 @@ void cpu_init(struct cpu *cpu)
   cpu->ram = malloc(128 * sizeof(unsigned char));
 }
 
-int cpu_ram_read(struct cpu *cpu, unsigned int index)
+int cpu_ram_read(struct cpu *cpu, unsigned char index)
 {
   return cpu->registers[index];
 }
 
-void cpu_ram_write(struct cpu *cpu, unsigned int index, unsigned int value)
+void cpu_ram_write(struct cpu *cpu, unsigned char index, int value)
 {
   cpu->registers[index] = value;
 }
