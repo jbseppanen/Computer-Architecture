@@ -13,7 +13,7 @@ void cpu_load(struct cpu *cpu, char *file_name)
 {
   FILE *fp;
   char line[1024];
-  printf("File Name:%s\n", file_name);
+  // printf("File Name:%s\n", file_name);
   fp = fopen(file_name, "r");
 
   if (fp == NULL)
@@ -63,7 +63,8 @@ void alu(struct cpu *cpu, enum alu_op op, unsigned char regA, unsigned char regB
     result = (operandA - operandB);
     break;
   }
-  printf("Result: %d\n", result);
+  cpu->registers[regA] = result;
+  // printf("Result: %d\n", result);
 }
 
 /**
