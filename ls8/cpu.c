@@ -87,52 +87,52 @@ void cpu_run(struct cpu *cpu)
       break;
 
     case PRN:
-      regA = cpu->ram[cpu->pc + 1];
+      regA = cpu_ram_read(cpu, cpu->pc + 1);
       v = cpu->registers[regA];
       // printf("Printing: ");
       printf("%d\n", v);
       break;
 
     case LDI:
-      regA = cpu->ram[cpu->pc + 1];
+      regA = cpu_ram_read(cpu, cpu->pc + 1);
       v = cpu->ram[cpu->pc + 2];
       cpu->registers[regA] = v;
       break;
 
     case MUL:
-      regA = cpu->ram[cpu->pc + 1];
-      regB = cpu->ram[cpu->pc + 2];
+      regA = cpu_ram_read(cpu, cpu->pc + 1);
+      regB = cpu_ram_read(cpu, cpu->pc + 2);
       alu(cpu, ALU_MUL, regA, regB);
       break;
 
     case DIV:
-      regA = cpu->ram[cpu->pc + 1];
-      regB = cpu->ram[cpu->pc + 2];
+      regA = cpu_ram_read(cpu, cpu->pc + 1);
+      regB = cpu_ram_read(cpu, cpu->pc + 2);
       alu(cpu, ALU_DIV, regA, regB);
       break;
 
     case ADD:
-      regA = cpu->ram[cpu->pc + 1];
-      regB = cpu->ram[cpu->pc + 2];
+      regA = cpu_ram_read(cpu, cpu->pc + 1);
+      regB = cpu_ram_read(cpu, cpu->pc + 2);
       alu(cpu, ALU_ADD, regA, regB);
       break;
 
     case SUB:
-      regA = cpu->ram[cpu->pc + 1];
-      regB = cpu->ram[cpu->pc + 2];
+      regA = cpu_ram_read(cpu, cpu->pc + 1);
+      regB = cpu_ram_read(cpu, cpu->pc + 2);
       alu(cpu, ALU_SUB, regA, regB);
       break;
 
     case PUSH:
       cpu->registers[SP]--;
-      regA = cpu->ram[cpu->pc + 1];
+      regA = cpu_ram_read(cpu, cpu->pc + 1);      
       v = cpu->registers[regA];
-      cpu_ram_write(cpu,cpu->registers[SP], v);
+      cpu_ram_write(cpu, cpu->registers[SP], v);
       break;
 
     case POP:
-      regA = cpu->ram[cpu->pc + 1];
-      cpu->registers[regA] = cpu_ram_read(cpu,cpu->registers[SP]);
+      regA = cpu_ram_read(cpu, cpu->pc + 1);      
+      cpu->registers[regA] = cpu_ram_read(cpu, cpu->registers[SP]);
       cpu->registers[SP]++;
       break;
 
