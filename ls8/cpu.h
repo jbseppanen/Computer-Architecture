@@ -34,6 +34,8 @@ enum alu_op
 #define DIV 0b10100011
 #define ADD 0b10100000
 #define SUB 0b10100001
+#define PUSH 0b01000101
+#define POP 0b01000110
 // TODO: more instructions here. These can be used in cpu_run().
 
 // Function declarations

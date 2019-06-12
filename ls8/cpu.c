@@ -1,8 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "cpu.h"
 
 #define DATA_LEN 6
+#define SP 7
 
 /**
  * Load the binary bytes from a .ls8 source file into a RAM array
@@ -20,15 +22,15 @@ void cpu_load(struct cpu *cpu, char *file_name)
     exit(1);
   }
 
-  int address = 0;
+  int mar = 0;
   while (fgets(line, 1024, fp) != NULL)
   {
     char *endptr;
     unsigned char v = strtoul(line, &endptr, 2);
     if (!(endptr == line)) //Check for empty/bad lines
     {
-      cpu->ram[address] = v;
-      address++;
+      cpu->ram[mar] = v;
+      mar++;
     }
   }
   fclose(fp);
@@ -39,8 +41,8 @@ void cpu_load(struct cpu *cpu, char *file_name)
  */
 void alu(struct cpu *cpu, enum alu_op op, unsigned char regA, unsigned char regB)
 {
-  int operandA = cpu_ram_read(cpu, regA);
-  int operandB = cpu_ram_read(cpu, regB);
+  int operandA = cpu->registers[regA];
+  int operandB = cpu->registers[regB];
   float result;
 
   switch (op)
@@ -79,15 +81,15 @@ void cpu_run(struct cpu *cpu)
     switch (ir)
     {
     case HLT:
-      printf("Exiting!\n");
+      printf("Exiting\n");
       running = 0;
       exit(0);
       break;
 
     case PRN:
-      printf("Printing!\n");
+      printf("Printing\n");
       regA = cpu->ram[cpu->pc + 1];
-      v = cpu_ram_read(cpu, regA);
+      v = cpu->registers[regA];
       printf("%d\n", v);
       break;
 
@@ -95,7 +97,7 @@ void cpu_run(struct cpu *cpu)
       regA = cpu->ram[cpu->pc + 1];
       v = cpu->ram[cpu->pc + 2];
       printf("Saving %u\n", v);
-      cpu_ram_write(cpu, regA, v);
+      cpu->registers[regA] = v;
       break;
 
     case MUL:
@@ -126,8 +128,8 @@ void cpu_run(struct cpu *cpu)
       printf("Unknown instruction %02x at address %02x\n", ir, cpu->pc);
       exit(1);
     }
-    int number_of_operands = ((ir >> 6) & 0b11) + 1;
-    cpu->pc += number_of_operands;
+    int pc_increment = ((ir >> 6) & 0b11) + 1;
+    cpu->pc += pc_increment;
   }
 }
 
@@ -138,15 +140,18 @@ void cpu_init(struct cpu *cpu)
 {
   cpu->pc = 0;
   cpu->registers = malloc(8 * sizeof(unsigned char));
+  memset(cpu->registers, 0, 8 * sizeof(unsigned char));
   cpu->ram = malloc(128 * sizeof(unsigned char));
+  memset(cpu->ram, 0, 128 * sizeof(unsigned char));
+  cpu->registers[SP] = 0xF4; //Set pointer to default.
 }
 
 int cpu_ram_read(struct cpu *cpu, unsigned char index)
 {
-  return cpu->registers[index];
+  return cpu->ram[index];
 }
 
 void cpu_ram_write(struct cpu *cpu, unsigned char index, int value)
 {
-  cpu->registers[index] = value;
+  cpu->ram[index] = value;
 }
