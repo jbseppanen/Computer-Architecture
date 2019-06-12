@@ -43,7 +43,7 @@ void alu(struct cpu *cpu, enum alu_op op, unsigned char regA, unsigned char regB
 {
   int operandA = cpu->registers[regA];
   int operandB = cpu->registers[regB];
-  float result;
+  int result;
 
   switch (op)
   {
@@ -63,7 +63,7 @@ void alu(struct cpu *cpu, enum alu_op op, unsigned char regA, unsigned char regB
     result = (operandA - operandB);
     break;
   }
-  printf("Result: %f\n", result);
+  printf("Result: %d\n", result);
 }
 
 /**
@@ -88,6 +88,7 @@ void cpu_run(struct cpu *cpu)
     case PRN:
       regA = cpu->ram[cpu->pc + 1];
       v = cpu->registers[regA];
+      // printf("Printing: ");
       printf("%d\n", v);
       break;
 
