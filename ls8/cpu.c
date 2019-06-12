@@ -81,13 +81,11 @@ void cpu_run(struct cpu *cpu)
     switch (ir)
     {
     case HLT:
-      printf("Exiting\n");
       running = 0;
       exit(0);
       break;
 
     case PRN:
-      printf("Printing\n");
       regA = cpu->ram[cpu->pc + 1];
       v = cpu->registers[regA];
       printf("%d\n", v);
@@ -96,7 +94,6 @@ void cpu_run(struct cpu *cpu)
     case LDI:
       regA = cpu->ram[cpu->pc + 1];
       v = cpu->ram[cpu->pc + 2];
-      printf("Saving %u\n", v);
       cpu->registers[regA] = v;
       break;
 
@@ -122,6 +119,19 @@ void cpu_run(struct cpu *cpu)
       regA = cpu->ram[cpu->pc + 1];
       regB = cpu->ram[cpu->pc + 2];
       alu(cpu, ALU_SUB, regA, regB);
+      break;
+
+    case PUSH:
+      cpu->registers[SP]--;
+      regA = cpu->ram[cpu->pc + 1];
+      v = cpu->registers[regA];
+      cpu_ram_write(cpu,cpu->registers[SP], v);
+      break;
+
+    case POP:
+      regA = cpu->ram[cpu->pc + 1];
+      cpu->registers[regA] = cpu_ram_read(cpu,cpu->registers[SP]);
+      cpu->registers[SP]++;
       break;
 
     default:
