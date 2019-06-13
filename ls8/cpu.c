@@ -13,7 +13,6 @@ void cpu_load(struct cpu *cpu, char *file_name)
 {
   FILE *fp;
   char line[1024];
-  // printf("File Name:%s\n", file_name);
   fp = fopen(file_name, "r");
 
   if (fp == NULL)
@@ -89,7 +88,6 @@ void cpu_run(struct cpu *cpu)
     case PRN:
       regA = cpu_ram_read(cpu, cpu->pc + 1);
       v = cpu->registers[regA];
-      // printf("Printing: ");
       printf("%d\n", v);
       break;
 
@@ -125,14 +123,27 @@ void cpu_run(struct cpu *cpu)
 
     case PUSH:
       cpu->registers[SP]--;
-      regA = cpu_ram_read(cpu, cpu->pc + 1);      
+      regA = cpu_ram_read(cpu, cpu->pc + 1);
       v = cpu->registers[regA];
       cpu_ram_write(cpu, cpu->registers[SP], v);
       break;
 
     case POP:
-      regA = cpu_ram_read(cpu, cpu->pc + 1);      
+      regA = cpu_ram_read(cpu, cpu->pc + 1);
       cpu->registers[regA] = cpu_ram_read(cpu, cpu->registers[SP]);
+      cpu->registers[SP]++;
+      break;
+
+    case CALL:
+      cpu->registers[SP]--;
+      v = cpu->pc + 2;
+      cpu_ram_write(cpu, cpu->registers[SP], v);
+      regA = cpu_ram_read(cpu, cpu->pc + 1);
+      cpu->pc = cpu->registers[regA];
+      break;
+
+    case RET:
+      cpu->pc = cpu_ram_read(cpu, cpu->registers[SP]);
       cpu->registers[SP]++;
       break;
 
@@ -140,8 +151,13 @@ void cpu_run(struct cpu *cpu)
       printf("Unknown instruction %02x at address %02x\n", ir, cpu->pc);
       exit(1);
     }
-    int pc_increment = ((ir >> 6) & 0b11) + 1;
-    cpu->pc += pc_increment;
+
+    int set_pc = ((ir >> 4) & 0b0001);
+    if (!set_pc)
+    {
+      int pc_increment = ((ir >> 6) & 0b11) + 1;
+      cpu->pc += pc_increment;
+    }
   }
 }
 
