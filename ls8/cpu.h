@@ -11,6 +11,8 @@ struct cpu
   unsigned char *registers;
   // ram (array)
   unsigned char *ram;
+  //Flag registers array
+  unsigned char *flags
 };
 
 // ALU operations

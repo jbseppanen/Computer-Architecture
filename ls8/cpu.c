@@ -172,6 +172,8 @@ void cpu_init(struct cpu *cpu)
   cpu->ram = malloc(128 * sizeof(unsigned char));
   memset(cpu->ram, 0, 128 * sizeof(unsigned char));
   cpu->registers[SP] = 0xF4; //Set pointer to default.
+  cpu->flags = malloc(8 * sizeof(unsigned char));
+  memset(cpu->flags, 0, 8 * sizeof(unsigned char));
 }
 
 int cpu_ram_read(struct cpu *cpu, unsigned char index)
