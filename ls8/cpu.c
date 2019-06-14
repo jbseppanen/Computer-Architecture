@@ -6,15 +6,15 @@
 #define DATA_LEN 6
 #define SP 7
 #define BYTE_TO_BINARY_PATTERN "%c%c%c%c%c%c%c%c"
-#define BYTE_TO_BINARY(byte)  \
-  (byte & 0x80 ? '1' : '0'), \
-  (byte & 0x40 ? '1' : '0'), \
-  (byte & 0x20 ? '1' : '0'), \
-  (byte & 0x10 ? '1' : '0'), \
-  (byte & 0x08 ? '1' : '0'), \
-  (byte & 0x04 ? '1' : '0'), \
-  (byte & 0x02 ? '1' : '0'), \
-  (byte & 0x01 ? '1' : '0') 
+#define BYTE_TO_BINARY(byte)     \
+  (byte & 0x80 ? '1' : '0'),     \
+      (byte & 0x40 ? '1' : '0'), \
+      (byte & 0x20 ? '1' : '0'), \
+      (byte & 0x10 ? '1' : '0'), \
+      (byte & 0x08 ? '1' : '0'), \
+      (byte & 0x04 ? '1' : '0'), \
+      (byte & 0x02 ? '1' : '0'), \
+      (byte & 0x01 ? '1' : '0')
 
 /**
  * Load the binary bytes from a .ls8 source file into a RAM array
@@ -77,16 +77,19 @@ void alu(struct cpu *cpu, enum alu_op op, unsigned char regA, unsigned char regB
     {
       cpu->flags = cpu->flags | 0b00000001;
       cpu->flags = cpu->flags & 0b11111001;
-    } else if (operandA > operandB)
+    }
+    else if (operandA > operandB)
     {
       cpu->flags = cpu->flags | 0b00000010;
       cpu->flags = cpu->flags & 0b11111010;
-    } else {
+    }
+    else
+    {
       cpu->flags = cpu->flags | 0b00000100;
       cpu->flags = cpu->flags & 0b11111100;
     }
-    printf("Flags: "BYTE_TO_BINARY_PATTERN"\n", BYTE_TO_BINARY(cpu->flags));
-    result = cpu->flags;
+    // printf("Flags: " BYTE_TO_BINARY_PATTERN "\n", BYTE_TO_BINARY(cpu->flags));
+    result = cpu->registers[regA];
     break;
   }
   cpu->registers[regA] = result;
@@ -99,7 +102,7 @@ void cpu_run(struct cpu *cpu)
 {
   int running = 1; // True until we get a HLT instruction
   unsigned char ir;
-  unsigned int v, regA, regB;
+  unsigned int v, regA, regB, jump;
 
   while (running)
   {
@@ -180,9 +183,34 @@ void cpu_run(struct cpu *cpu)
       break;
 
     case JMP:
-      printf("Here!\n");
       regA = cpu_ram_read(cpu, cpu->pc + 1);
       cpu->pc = cpu->registers[regA];
+      break;
+
+    case JEQ:
+      jump = (cpu->flags & 0b00000001);
+      if (jump == 0b00000001)
+      {
+        regA = cpu_ram_read(cpu, cpu->pc + 1);
+        cpu->pc = cpu->registers[regA];
+      }
+      else
+      {
+        cpu->pc += ((ir >> 6) & 0b11) + 1;
+      }
+      break;
+
+    case JNE:
+      jump = (cpu->flags & 0b00000001);
+      if (jump == 0b00000000)
+      {
+        regA = cpu_ram_read(cpu, cpu->pc + 1);
+        cpu->pc = cpu->registers[regA];
+      }
+      else
+      {
+        cpu->pc += ((ir >> 6) & 0b11) + 1;
+      }
       break;
 
     default:
