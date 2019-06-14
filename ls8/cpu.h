@@ -22,7 +22,8 @@ enum alu_op
   ALU_DIV,
   ALU_ADD,
   ALU_SUB,
-  ALU_CMP
+  ALU_CMP,
+  ALU_AND
 };
 
 // Instructions
@@ -49,6 +50,7 @@ enum alu_op
 #define JLT 0b01011000
 #define JMP 0b01010100
 #define JNE 0b01010110
+#define AND 0b10101000
 // TODO: more instructions here. These can be used in cpu_run().
 
 // Function declarations

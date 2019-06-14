@@ -88,10 +88,17 @@ void alu(struct cpu *cpu, enum alu_op op, unsigned char regA, unsigned char regB
       cpu->flags = cpu->flags | 0b00000100;
       cpu->flags = cpu->flags & 0b11111100;
     }
-    // printf("Flags: " BYTE_TO_BINARY_PATTERN "\n", BYTE_TO_BINARY(cpu->flags));
     result = cpu->registers[regA];
     break;
+
+  case ALU_AND:
+    result = operandA & operandB;
+    break;
+
+  default:
+    printf("Unknown ALU operantion.\n");
   }
+  // printf("Flags: " BYTE_TO_BINARY_PATTERN "\n", BYTE_TO_BINARY(cpu->flags));
   cpu->registers[regA] = result;
 }
 
@@ -211,6 +218,12 @@ void cpu_run(struct cpu *cpu)
       {
         cpu->pc += ((ir >> 6) & 0b11) + 1;
       }
+      break;
+
+    case AND:
+      regA = cpu_ram_read(cpu, cpu->pc + 1);
+      regB = cpu_ram_read(cpu, cpu->pc + 2);
+      alu(cpu, ALU_AND, regA, regB);
       break;
 
     default:
