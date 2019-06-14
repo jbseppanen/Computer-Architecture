@@ -61,9 +61,20 @@ void alu(struct cpu *cpu, enum alu_op op, unsigned char regA, unsigned char regB
   case ALU_SUB:
     result = (operandA - operandB);
     break;
+
+  case ALU_CMP:
+    if (operandA == operandB)
+    {
+      cpu->flags = cpu->flags & 0b00000001;
+    } else if (operandA < operandB)
+    {
+      cpu->flags = cpu->flags & 0b00000010;
+    } else {
+      cpu->flags = cpu->flags & 0b00000100;
+    }
+    break;
   }
   cpu->registers[regA] = result;
-  // printf("Result: %d\n", result);
 }
 
 /**
@@ -145,6 +156,12 @@ void cpu_run(struct cpu *cpu)
     case RET:
       cpu->pc = cpu_ram_read(cpu, cpu->registers[SP]);
       cpu->registers[SP]++;
+      break;
+
+    case CMP:
+      regA = cpu_ram_read(cpu, cpu->pc + 1);
+      regB = cpu_ram_read(cpu, cpu->pc + 2);
+      alu(cpu, ALU_CMP, regA, regB);
       break;
 
     default:

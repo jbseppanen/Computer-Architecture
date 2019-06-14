@@ -12,7 +12,7 @@ struct cpu
   // ram (array)
   unsigned char *ram;
   //Flag registers array
-  unsigned char *flags
+  unsigned char flags
 };
 
 // ALU operations
