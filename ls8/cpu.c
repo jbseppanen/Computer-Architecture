@@ -99,6 +99,10 @@ void alu(struct cpu *cpu, enum alu_op op, unsigned char regA, unsigned char regB
     result = operandA | operandB;
     break;
 
+  case ALU_XOR:
+    result = operandA ^ operandB;
+    break;
+
   default:
     printf("Unknown ALU operantion.\n");
   }
@@ -234,6 +238,12 @@ void cpu_run(struct cpu *cpu)
       regA = cpu_ram_read(cpu, cpu->pc + 1);
       regB = cpu_ram_read(cpu, cpu->pc + 2);
       alu(cpu, ALU_OR, regA, regB);
+      break;
+
+    case XOR:
+      regA = cpu_ram_read(cpu, cpu->pc + 1);
+      regB = cpu_ram_read(cpu, cpu->pc + 2);
+      alu(cpu, ALU_XOR, regA, regB);
       break;
 
     default:
